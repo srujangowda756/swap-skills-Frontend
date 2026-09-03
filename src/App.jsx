@@ -1,122 +1,214 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState, useEffect, useCallback } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Navbar } from './components/Navbar';
+import { DiscoverView } from './components/DiscoverView';
+import { SkillsCatalogView } from './components/SkillsCatalogView';
+import { MyProfileView } from './components/MyProfileView';
+import { AuthModal } from './components/AuthModal';
+import { AddSkillModal } from './components/AddSkillModal';
+import { SwapRequestModal } from './components/SwapRequestModal';
+import { Toast } from './components/Toast';
+import { api, API_BASE_URL } from './services/api';
 
-function App() {
-  const [count, setCount] = useState(0)
+function MainApp() {
+  const { user, isAuthenticated } = useAuth();
+
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'skills' | 'profile'
+
+  // Global Data
+  const [allSkills, setAllSkills] = useState([]);
+  const [mySkills, setMySkills] = useState([]);
+  const [loadingSkills, setLoadingSkills] = useState(true);
+
+  // Modals
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('login');
+  const [addSkillModalOpen, setAddSkillModalOpen] = useState(false);
+
+  // Swap Request Modal State
+  const [swapModalState, setSwapModalState] = useState({
+    isOpen: false,
+    targetUser: null,
+    targetSkill: null,
+    targetType: 'teach',
+  });
+
+  // Toasts
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  };
+
+  const dismissToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Fetch all platform skills
+  const fetchAllSkills = useCallback(async () => {
+    try {
+      setLoadingSkills(true);
+      const data = await api.getSkills();
+      setAllSkills(data);
+    } catch (err) {
+      console.error('Failed to load skills:', err);
+      showToast('Could not load skills catalog. Please check backend connection.', 'error');
+    } finally {
+      setLoadingSkills(false);
+    }
+  }, []);
+
+  // Fetch logged-in user's skills
+  const fetchMySkills = useCallback(async () => {
+    if (!user) {
+      setMySkills([]);
+      return;
+    }
+    try {
+      const data = await api.getUserSkills(user.id);
+      setMySkills(data);
+    } catch (err) {
+      console.error('Failed to load user skills:', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchAllSkills();
+  }, [fetchAllSkills]);
+
+  useEffect(() => {
+    fetchMySkills();
+  }, [fetchMySkills]);
+
+  const handleOpenAuth = (mode = 'login') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const handleSelectSkillForDiscovery = (skillId) => {
+    setActiveTab('discover');
+    // Scroll smoothly to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenSwapModal = (targetUser, targetSkill, targetType) => {
+    setSwapModalState({
+      isOpen: true,
+      targetUser,
+      targetSkill,
+      targetType,
+    });
+  };
+
+  const handleCloseSwapModal = () => {
+    setSwapModalState({
+      isOpen: false,
+      targetUser: null,
+      targetSkill: null,
+      targetType: 'teach',
+    });
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <div className="app-container">
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenAuth={handleOpenAuth}
+        mySkillsCount={mySkills.length}
+      />
+
+      <main className="main-content">
+        {activeTab === 'discover' && (
+          <DiscoverView
+            allSkills={allSkills}
+            mySkills={mySkills}
+            onOpenAuth={handleOpenAuth}
+            onOpenSwapModal={handleOpenSwapModal}
+            onOpenAddSkill={() => setAddSkillModalOpen(true)}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'skills' && (
+          <SkillsCatalogView
+            skills={allSkills}
+            mySkills={mySkills}
+            onOpenAddSkill={() => setAddSkillModalOpen(true)}
+            onOpenAuth={handleOpenAuth}
+            onSkillAddedToUser={fetchMySkills}
+            onSelectSkillForDiscovery={handleSelectSkillForDiscovery}
+            onShowToast={showToast}
+          />
+        )}
+
+        {activeTab === 'profile' && isAuthenticated && (
+          <MyProfileView
+            allSkills={allSkills}
+            mySkills={mySkills}
+            onRefreshMySkills={fetchMySkills}
+            onSelectSkillForDiscovery={handleSelectSkillForDiscovery}
+            onShowToast={showToast}
+            setActiveTab={setActiveTab}
+          />
+        )}
+      </main>
+
+      <footer className="app-footer">
+        <div className="footer-container">
+          <p className="footer-text">
+            © 2026 SwapSkills. Open Peer Knowledge Exchange Platform.
           </p>
+          <div className="footer-api-status">
+            <span className="status-dot"></span>
+          </div>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </footer>
 
-      <div className="ticks"></div>
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authModalMode}
+        onSuccess={(msg) => {
+          showToast(msg, 'success');
+          fetchMySkills();
+        }}
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <AddSkillModal
+        isOpen={addSkillModalOpen}
+        onClose={() => setAddSkillModalOpen(false)}
+        onSkillAdded={(newSkill) => {
+          setAllSkills((prev) => [newSkill, ...prev]);
+          showToast(`"${newSkill.skill_name}" added to skills catalog!`, 'success');
+        }}
+      />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <SwapRequestModal
+        isOpen={swapModalState.isOpen}
+        onClose={handleCloseSwapModal}
+        targetUser={swapModalState.targetUser}
+        targetSkill={swapModalState.targetSkill}
+        targetType={swapModalState.targetType}
+        userSkills={mySkills}
+        onSuccess={(msg) => showToast(msg, 'success')}
+      />
+
+      {/* Notification Toasts */}
+      <Toast toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
