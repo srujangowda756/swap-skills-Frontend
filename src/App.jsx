@@ -1,40 +1,56 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
-import { DiscoverView } from './components/DiscoverView';
-import { SkillsCatalogView } from './components/SkillsCatalogView';
-import { MyProfileView } from './components/MyProfileView';
-import { AuthModal } from './components/AuthModal';
-import { AddSkillModal } from './components/AddSkillModal';
-import { SwapRequestModal } from './components/SwapRequestModal';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { DiscoverPage } from './pages/DiscoverPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 import { Toast } from './components/Toast';
-import { api, API_BASE_URL } from './services/api';
+import { Loader2 } from 'lucide-react';
 
-function MainApp() {
-  const { user, isAuthenticated } = useAuth();
+// Protected Route wrapper for authenticated pages
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
 
-  // Navigation State
-  const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'skills' | 'profile'
+  if (loading) {
+    return (
+      <div className="page-loader">
+        <Loader2 size={40} className="animate-spin text-cyan" />
+        <p>Verifying session...</p>
+      </div>
+    );
+  }
 
-  // Global Data
-  const [allSkills, setAllSkills] = useState([]);
-  const [mySkills, setMySkills] = useState([]);
-  const [loadingSkills, setLoadingSkills] = useState(true);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-  // Modals
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState('login');
-  const [addSkillModalOpen, setAddSkillModalOpen] = useState(false);
+  return children;
+}
 
-  // Swap Request Modal State
-  const [swapModalState, setSwapModalState] = useState({
-    isOpen: false,
-    targetUser: null,
-    targetSkill: null,
-    targetType: 'teach',
-  });
+// Redirect already logged-in users away from Login/Register to Dashboard
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
 
-  // Toasts
+  if (loading) {
+    return (
+      <div className="page-loader">
+        <Loader2 size={40} className="animate-spin text-cyan" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
+function MainLayout() {
+  const { isAuthenticated } = useAuth();
   const [toasts, setToasts] = useState([]);
 
   const showToast = (message, type = 'info') => {
@@ -42,164 +58,77 @@ function MainApp() {
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
+    }, 4000);
   };
 
   const dismissToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Fetch all platform skills
-  const fetchAllSkills = useCallback(async () => {
-    try {
-      setLoadingSkills(true);
-      const data = await api.getSkills();
-      setAllSkills(data);
-    } catch (err) {
-      console.error('Failed to load skills:', err);
-      showToast('Could not load skills catalog. Please check backend connection.', 'error');
-    } finally {
-      setLoadingSkills(false);
-    }
-  }, []);
-
-  // Fetch logged-in user's skills
-  const fetchMySkills = useCallback(async () => {
-    if (!user) {
-      setMySkills([]);
-      return;
-    }
-    try {
-      const data = await api.getUserSkills(user.id);
-      setMySkills(data);
-    } catch (err) {
-      console.error('Failed to load user skills:', err);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchAllSkills();
-  }, [fetchAllSkills]);
-
-  useEffect(() => {
-    fetchMySkills();
-  }, [fetchMySkills]);
-
-  const handleOpenAuth = (mode = 'login') => {
-    setAuthModalMode(mode);
-    setAuthModalOpen(true);
-  };
-
-  const handleSelectSkillForDiscovery = (skillId) => {
-    setActiveTab('discover');
-    // Scroll smoothly to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOpenSwapModal = (targetUser, targetSkill, targetType) => {
-    setSwapModalState({
-      isOpen: true,
-      targetUser,
-      targetSkill,
-      targetType,
-    });
-  };
-
-  const handleCloseSwapModal = () => {
-    setSwapModalState({
-      isOpen: false,
-      targetUser: null,
-      targetSkill: null,
-      targetType: 'teach',
-    });
-  };
-
   return (
     <div className="app-container">
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onOpenAuth={handleOpenAuth}
-        mySkillsCount={mySkills.length}
-      />
+      <Navbar />
 
       <main className="main-content">
-        {activeTab === 'discover' && (
-          <DiscoverView
-            allSkills={allSkills}
-            mySkills={mySkills}
-            onOpenAuth={handleOpenAuth}
-            onOpenSwapModal={handleOpenSwapModal}
-            onOpenAddSkill={() => setAddSkillModalOpen(true)}
-            setActiveTab={setActiveTab}
+        <Routes>
+          {/* Public Auth Routes */}
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            }
           />
-        )}
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <RegisterPage />
+              </PublicOnlyRoute>
+            }
+          />
 
-        {activeTab === 'skills' && (
-          <SkillsCatalogView
-            skills={allSkills}
-            mySkills={mySkills}
-            onOpenAddSkill={() => setAddSkillModalOpen(true)}
-            onOpenAuth={handleOpenAuth}
-            onSkillAddedToUser={fetchMySkills}
-            onSelectSkillForDiscovery={handleSelectSkillForDiscovery}
-            onShowToast={showToast}
+          {/* Protected Dashboard Route */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage onShowToast={showToast} />
+              </ProtectedRoute>
+            }
           />
-        )}
 
-        {activeTab === 'profile' && isAuthenticated && (
-          <MyProfileView
-            allSkills={allSkills}
-            mySkills={mySkills}
-            onRefreshMySkills={fetchMySkills}
-            onSelectSkillForDiscovery={handleSelectSkillForDiscovery}
-            onShowToast={showToast}
-            setActiveTab={setActiveTab}
+          {/* Public / Open Discovery Routes */}
+          <Route path="/discover" element={<DiscoverPage />} />
+          <Route path="/user/:userId" element={<UserProfilePage />} />
+
+          {/* Root Redirect */}
+          <Route
+            path="/"
+            element={
+              <Navigate to={isAuthenticated ? '/dashboard' : '/discover'} replace />
+            }
           />
-        )}
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
       <footer className="app-footer">
         <div className="footer-container">
           <p className="footer-text">
-            © 2026 SwapSkills. Open Peer Knowledge Exchange Platform.
+            © 2026 SwapSkills v1. Peer-to-Peer Knowledge Sharing Platform.
           </p>
           <div className="footer-api-status">
             <span className="status-dot"></span>
+            <span>API Online</span>
           </div>
         </div>
       </footer>
 
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialMode={authModalMode}
-        onSuccess={(msg) => {
-          showToast(msg, 'success');
-          fetchMySkills();
-        }}
-      />
-
-      <AddSkillModal
-        isOpen={addSkillModalOpen}
-        onClose={() => setAddSkillModalOpen(false)}
-        onSkillAdded={(newSkill) => {
-          setAllSkills((prev) => [newSkill, ...prev]);
-          showToast(`"${newSkill.skill_name}" added to skills catalog!`, 'success');
-        }}
-      />
-
-      <SwapRequestModal
-        isOpen={swapModalState.isOpen}
-        onClose={handleCloseSwapModal}
-        targetUser={swapModalState.targetUser}
-        targetSkill={swapModalState.targetSkill}
-        targetType={swapModalState.targetType}
-        userSkills={mySkills}
-        onSuccess={(msg) => showToast(msg, 'success')}
-      />
-
-      {/* Notification Toasts */}
+      {/* Global Toasts */}
       <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
@@ -207,8 +136,10 @@ function MainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <MainLayout />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

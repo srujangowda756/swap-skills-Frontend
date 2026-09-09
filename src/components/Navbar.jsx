@@ -1,9 +1,23 @@
 import React from 'react';
-import { ArrowLeftRight, Compass, Sparkles, BookOpen, User, LogOut, LogIn } from 'lucide-react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeftRight,
+  Compass,
+  User,
+  LogOut,
+  LogIn,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const Navbar = ({ activeTab, setActiveTab, onOpenAuth, mySkillsCount = 0 }) => {
+export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -18,92 +32,79 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuth, mySkillsCount = 0 
   return (
     <header className="navbar">
       <div className="navbar-container">
-        <div className="navbar-brand" onClick={() => setActiveTab('discover')}>
+        {/* Brand Link */}
+        <Link to={isAuthenticated ? '/dashboard' : '/discover'} className="navbar-brand">
           <div className="brand-logo-glow">
-            <ArrowLeftRight className="brand-icon" size={24} />
+            <ArrowLeftRight className="brand-icon" size={22} />
           </div>
           <div className="brand-text">
-            <span className="brand-title">Swap<span className="gradient-text">Skills</span></span>
-            <span className="brand-badge">Peer-to-Peer</span>
+            <span className="brand-title">
+              Swap<span className="gradient-text">Skills</span>
+            </span>
+            <span className="brand-badge">v1.0 • Peer Learning</span>
           </div>
-        </div>
+        </Link>
 
+        {/* Navigation Links */}
         <nav className="navbar-links" aria-label="Main Navigation">
-          <button
-            type="button"
-            className={`nav-link ${activeTab === 'discover' ? 'active' : ''}`}
-            onClick={() => setActiveTab('discover')}
-          >
-            <Compass size={18} />
-            <span>Discover & Match</span>
-          </button>
-
-          <button
-            type="button"
-            className={`nav-link ${activeTab === 'skills' ? 'active' : ''}`}
-            onClick={() => setActiveTab('skills')}
-          >
-            <BookOpen size={18} />
-            <span>All Skills</span>
-          </button>
-
-          <button
-            type="button"
-            className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => {
-              if (!isAuthenticated) {
-                onOpenAuth('login');
-              } else {
-                setActiveTab('profile');
+          {isAuthenticated && (
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'active' : ''}`
               }
-            }}
+              id="nav-dashboard-link"
+            >
+              <User size={17} />
+              <span>Dashboard</span>
+            </NavLink>
+          )}
+
+          <NavLink
+            to="/discover"
+            className={({ isActive }) =>
+              `nav-link ${isActive ? 'active' : ''}`
+            }
+            id="nav-discover-link"
           >
-            <User size={18} />
-            <span>My Profile</span>
-            {isAuthenticated && mySkillsCount > 0 && (
-              <span className="nav-counter">{mySkillsCount}</span>
-            )}
-          </button>
+            <Compass size={17} />
+            <span>Discover</span>
+          </NavLink>
         </nav>
 
+        {/* Auth Section */}
         <div className="navbar-auth">
           {isAuthenticated ? (
             <div className="user-profile-menu">
-              <div className="user-badge" title={user.email}>
-                <div className="user-avatar">{getInitials(user.name)}</div>
+              <div className="user-badge" title={user?.email || ''}>
+                <div className="user-avatar">{getInitials(user?.name)}</div>
                 <div className="user-info-text">
-                  <span className="user-name">{user.name}</span>
-                  <span className="user-email">{user.email}</span>
+                  <span className="user-name">{user?.name || 'User'}</span>
+                  <span className="user-email">{user?.email || ''}</span>
                 </div>
               </div>
               <button
                 type="button"
-                className="btn btn-secondary btn-icon-only"
-                onClick={logout}
-                title="Sign Out"
-                aria-label="Sign Out"
+                className="btn btn-secondary btn-icon-only logout-btn"
+                onClick={handleLogout}
+                title="Log Out"
+                aria-label="Log Out"
+                id="logout-button"
               >
                 <LogOut size={16} />
+                <span className="logout-text">Log Out</span>
               </button>
             </div>
           ) : (
             <div className="auth-actions">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => onOpenAuth('login')}
-              >
+              <Link to="/login" className="btn btn-secondary" id="nav-login-btn">
                 <LogIn size={16} />
                 <span>Log In</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => onOpenAuth('register')}
-              >
+              </Link>
+              <Link to="/register" className="btn btn-primary" id="nav-register-btn">
                 <Sparkles size={16} />
-                <span>Get Started</span>
-              </button>
+                <span>Register</span>
+              </Link>
             </div>
           )}
         </div>

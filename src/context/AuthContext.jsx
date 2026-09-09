@@ -44,9 +44,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    await api.register({ name, email, password });
-    // Log user in right after registration
-    return await login(email, password);
+    const result = await api.register({ name, email, password });
+    return result;
   };
 
   const logout = () => {
