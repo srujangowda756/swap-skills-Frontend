@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Send, ArrowLeftRight, CheckCircle2, UserCheck } from 'lucide-react';
+import { X, Send, ArrowLeftRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 
 export const SwapRequestModal = ({
   isOpen,
@@ -15,6 +16,8 @@ export const SwapRequestModal = ({
   const [selectedOfferSkill, setSelectedOfferSkill] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -23,16 +26,31 @@ export const SwapRequestModal = ({
     targetType === 'teach' ? us.type === 'teach' : us.type === 'learn'
   );
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => {
+    setError('');
+
+    if (!targetUser?.id) {
+      setError('Unable to send a request to this user right now.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await api.sendSwapRequest(targetUser.id);
+      setSent(true);
       if (onSuccess) {
         onSuccess(`Swap request sent to ${targetUser?.name || 'user'}!`);
       }
-      setSent(false);
-      onClose();
-    }, 1200);
+      setTimeout(() => {
+        setSent(false);
+        onClose();
+      }, 1200);
+    } catch (err) {
+      setError(err.message || 'Failed to send the swap request.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,6 +74,13 @@ export const SwapRequestModal = ({
             Connect with <strong>{targetUser?.name || 'this member'}</strong> to exchange knowledge and organize a session.
           </p>
         </div>
+
+        {error && (
+          <div className="alert-banner alert-error" role="alert">
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </div>
+        )}
 
         {sent ? (
           <div className="success-confirmation">
@@ -129,9 +154,10 @@ export const SwapRequestModal = ({
               <button
                 type="submit"
                 className="btn btn-primary"
+                disabled={submitting}
               >
                 <Send size={16} />
-                <span>Send Proposal</span>
+                <span>{submitting ? 'Sending...' : 'Send Proposal'}</span>
               </button>
             </div>
           </form>

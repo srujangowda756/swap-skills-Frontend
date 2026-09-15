@@ -44,6 +44,14 @@ export const api = {
     });
     return handleResponse(response);
   },
+  async sendSwapRequest(receiverId) {
+  const response = await fetch(`${API_BASE_URL}/swap-requests/`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ receiver_id: receiverId }),
+  });
+  return handleResponse(response);
+},
 
   async register(userData) {
     const response = await fetch(`${API_BASE_URL}/user/register`, {
@@ -132,5 +140,46 @@ export const api = {
       if (err.status === 404) return [];
       throw err;
     }
+  },
+
+  async listSwapRequests(type = 'received') {
+    const response = await fetch(`${API_BASE_URL}/swap-requests/${type}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async respondToSwapRequest(requestId, action) {
+    const response = await fetch(`${API_BASE_URL}/swap-requests/${requestId}/${action}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async getConversations() {
+    const response = await fetch(`${API_BASE_URL}/conversations/`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async getConversationMessages(conversationId) {
+    const response = await fetch(`${API_BASE_URL}/messages/${conversationId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async sendMessage(payload) {
+    const response = await fetch(`${API_BASE_URL}/messages/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
   },
 };

@@ -1,38 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, Link } from "react-router-dom";
 import {
-  User,
   ArrowLeft,
   GraduationCap,
   Sparkles,
   Loader2,
   AlertCircle,
-  Award,
-} from 'lucide-react';
-import { api } from '../services/api';
+  Send,
+} from "lucide-react";
+import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { SwapRequestModal } from "../components/SwapRequestModal";
 
 export const UserProfilePage = () => {
   const { userId } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
 
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+  const [mySkills, setMySkills] = useState([]);
 
-  const userName = location.state?.userName || 'Member Profile';
+  const userName = location.state?.userName || "Member Profile";
 
   useEffect(() => {
     const fetchUserSkills = async () => {
       if (!userId) return;
       setLoading(true);
-      setError('');
+      setError("");
       try {
         const data = await api.getUserSkills(userId);
         setSkills(data || []);
       } catch (err) {
-        console.error('Failed to load user profile skills:', err);
-        setError('Could not retrieve this user profile.');
+        console.error("Failed to load user profile skills:", err);
+        setError("Could not retrieve this user profile.");
       } finally {
         setLoading(false);
       }
@@ -41,18 +44,32 @@ export const UserProfilePage = () => {
     fetchUserSkills();
   }, [userId]);
 
+  useEffect(() => {
+    const loadMySkills = async () => {
+      if (!currentUser?.id) return;
+      try {
+        const data = await api.getUserSkills(currentUser.id);
+        setMySkills(data || []);
+      } catch (err) {
+        console.error("Failed to load your skills for swap request:", err);
+      }
+    };
+
+    loadMySkills();
+  }, [currentUser?.id]);
+
   const getInitials = (name) => {
-    if (!name) return 'U';
+    if (!name) return "U";
     return name
-      .split(' ')
+      .split(" ")
       .map((part) => part[0])
-      .join('')
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
-  const teachSkills = skills.filter((s) => s.type === 'teach');
-  const learnSkills = skills.filter((s) => s.type === 'learn');
+  const teachSkills = skills.filter((s) => s.type === "teach");
+  const learnSkills = skills.filter((s) => s.type === "learn");
 
   return (
     <div className="user-profile-container">
@@ -65,11 +82,9 @@ export const UserProfilePage = () => {
       </div>
 
       {/* User Header */}
-      <div className="profile-hero-card">
+      <div className="profile-hero-card profile-hero-card-alt">
         <div className="profile-user-main">
-          <div className="profile-avatar-large">
-            {getInitials(userName)}
-          </div>
+          <div className="profile-avatar-large">{getInitials(userName)}</div>
           <div className="profile-details">
             <div className="user-role-badge">Community Member</div>
             <h1 className="profile-user-name">{userName}</h1>
@@ -77,6 +92,17 @@ export const UserProfilePage = () => {
               Sharing expertise and exploring new knowledge on SkillSwap
             </p>
           </div>
+        </div>
+
+        <div className="profile-actions-bar profile-actions-bar-right">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setIsSwapModalOpen(true)}
+          >
+            <Send size={18} />
+            <span>Send Swap Request</span>
+          </button>
         </div>
       </div>
 
@@ -109,7 +135,8 @@ export const UserProfilePage = () => {
                 </div>
               </div>
               <span className="skill-counter-badge badge-teach">
-                {teachSkills.length} {teachSkills.length === 1 ? 'Skill' : 'Skills'}
+                {teachSkills.length}{" "}
+                {teachSkills.length === 1 ? "Skill" : "Skills"}
               </span>
             </div>
 
@@ -125,7 +152,10 @@ export const UserProfilePage = () => {
                     className="skill-chip-tag chip-teach"
                     title={userSkill.skill_description}
                   >
-                    <GraduationCap size={15} className="chip-icon text-emerald" />
+                    <GraduationCap
+                      size={15}
+                      className="chip-icon text-emerald"
+                    />
                     <span className="chip-name">{userSkill.skill_name}</span>
                   </div>
                 ))}
@@ -148,7 +178,8 @@ export const UserProfilePage = () => {
                 </div>
               </div>
               <span className="skill-counter-badge badge-learn">
-                {learnSkills.length} {learnSkills.length === 1 ? 'Skill' : 'Skills'}
+                {learnSkills.length}{" "}
+                {learnSkills.length === 1 ? "Skill" : "Skills"}
               </span>
             </div>
 
@@ -173,6 +204,21 @@ export const UserProfilePage = () => {
           </section>
         </div>
       )}
+
+      <SwapRequestModal
+        isOpen={isSwapModalOpen}
+        onClose={() => setIsSwapModalOpen(false)}
+        targetUser={{
+          id: userId,
+          name: userName,
+        }}
+        targetSkill={
+          teachSkills[0] || learnSkills[0] || { skill_name: "a skill" }
+        }
+        targetType={teachSkills.length > 0 ? "teach" : "learn"}
+        userSkills={mySkills}
+        onSuccess={() => setIsSwapModalOpen(false)}
+      />
     </div>
   );
 };

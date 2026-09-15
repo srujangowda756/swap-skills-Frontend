@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { Navbar } from './components/Navbar';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { DiscoverPage } from './pages/DiscoverPage';
-import { UserProfilePage } from './pages/UserProfilePage';
-import { Toast } from './components/Toast';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Navbar } from "./components/Navbar";
+import { LandingPage } from "./pages/LandingPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { DiscoverPage } from "./pages/DiscoverPage";
+import { UserProfilePage } from "./pages/UserProfilePage";
+import { RequestsPage } from "./pages/RequestsPage";
+import { InboxPage } from "./pages/InboxPage";
+import { ChatPage } from "./pages/ChatPage";
+import { Toast } from "./components/Toast";
+import { Loader2 } from "lucide-react";
 
 // Protected Route wrapper for authenticated pages
 function ProtectedRoute({ children }) {
@@ -51,9 +61,11 @@ function PublicOnlyRoute({ children }) {
 
 function MainLayout() {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   const [toasts, setToasts] = useState([]);
+  const hideChrome = ["/", "/login", "/register"].includes(location.pathname);
 
-  const showToast = (message, type = 'info') => {
+  const showToast = (message, type = "info") => {
     const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
@@ -67,10 +79,23 @@ function MainLayout() {
 
   return (
     <div className="app-container">
-      <Navbar />
+      {!hideChrome && <Navbar />}
 
-      <main className="main-content">
+      <main
+        className={hideChrome ? "main-content landing-shell" : "main-content"}
+      >
         <Routes>
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <LandingPage />
+              )
+            }
+          />
+
           {/* Public Auth Routes */}
           <Route
             path="/login"
@@ -99,34 +124,71 @@ function MainLayout() {
             }
           />
 
-          {/* Public / Open Discovery Routes */}
-          <Route path="/discover" element={<DiscoverPage />} />
-          <Route path="/user/:userId" element={<UserProfilePage />} />
-
-          {/* Root Redirect */}
+          {/* Protected App Routes */}
           <Route
-            path="/"
+            path="/discover"
             element={
-              <Navigate to={isAuthenticated ? '/dashboard' : '/discover'} replace />
+              <ProtectedRoute>
+                <DiscoverPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/requests"
+            element={
+              <ProtectedRoute>
+                <RequestsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inbox"
+            element={
+              <ProtectedRoute>
+                <InboxPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/:conversationId"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/:userId"
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
+              </ProtectedRoute>
             }
           />
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route
+            path="*"
+            element={
+              <Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />
+            }
+          />
         </Routes>
       </main>
 
-      <footer className="app-footer">
-        <div className="footer-container">
-          <p className="footer-text">
-            © 2026 SwapSkills v1. Peer-to-Peer Knowledge Sharing Platform.
-          </p>
-          <div className="footer-api-status">
-            <span className="status-dot"></span>
-            <span>API Online</span>
+      {!hideChrome && (
+        <footer className="app-footer">
+          <div className="footer-container">
+            <p className="footer-text">
+              © 2026 SwapSkills v1. Peer-to-Peer Knowledge Sharing Platform.
+            </p>
+            <div className="footer-api-status">
+              <span className="status-dot"></span>
+              <span>API Online</span>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* Global Toasts */}
       <Toast toasts={toasts} onDismiss={dismissToast} />
