@@ -61,7 +61,6 @@ export const Navbar = () => {
               <User size={17} />
               <span>Dashboard</span>
             </NavLink>
-          )}
 
             <NavLink
               to="/discover"
