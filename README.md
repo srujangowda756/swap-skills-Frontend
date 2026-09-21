@@ -1,16 +1,60 @@
-# React + Vite
+# SwapSkills Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SwapSkills is a peer-to-peer learning app where people exchange practical skills. This repository contains the React/Vite client only. The FastAPI backend lives in a separate repository and is reached through the URL configured by `VITE_API_URL`.
 
-Currently, two official plugins are available:
+## What is included
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Responsive landing, authentication, dashboard, discovery, requests, inbox, and chat screens
+- Skill profiles with teach and learn goals
+- User discovery and swap requests
+- Authenticated conversations and messaging
+- Shared dark glass UI with accessible focus states, responsive layouts, and reduced-motion support
 
-## React Compiler
+## Requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20 or newer
+- npm 10 or newer
+- A running SwapSkills API
 
-## Expanding the ESLint configuration
+## Local setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+copy .env.example .env.local
+npm run dev
+```
+
+Open the URL printed by Vite, usually `http://localhost:5173`.
+
+## Environment
+
+Create `.env.local` from `.env.example`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+The API must allow requests from the Vite development origin through CORS. Do not commit `.env.local` or credentials.
+
+## Scripts
+
+| Command           | Purpose                              |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Start the Vite development server    |
+| `npm run build`   | Create a production build in `dist/` |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint`    | Run ESLint                           |
+
+## Deploying
+
+Build the frontend with `npm run build`, then deploy the generated `dist/` directory to a static host such as Vercel, Netlify, Cloudflare Pages, or GitHub Pages. Set `VITE_API_URL` in the host's build environment to the public backend URL and configure the backend CORS allowlist for the deployed frontend domain.
+
+For client-side routing, configure the host to serve `index.html` for unknown paths so routes such as `/discover` and `/chat/:conversationId` work after a refresh.
+
+## Repository split
+
+This frontend repo intentionally does not contain the Python API, database migrations, or backend secrets. Keep backend setup, migrations, and deployment configuration in the backend repository.
+
+## License
+
+Add the project license before publishing the repository publicly.
