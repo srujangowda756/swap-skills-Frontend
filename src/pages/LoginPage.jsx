@@ -35,6 +35,16 @@ export const LoginPage = () => {
       // On success, redirects to Dashboard
       navigate('/dashboard', { replace: true });
     } catch (err) {
+      if (err.status === 403 && err.message === 'Email not verified') {
+        navigate('/verify-email', {
+          replace: true,
+          state: {
+            email: email.trim(),
+            message: 'Verify your email before signing in.',
+          },
+        });
+        return;
+      }
       setError(err.message || 'Login failed. Please check your email and password.');
     } finally {
       setLoading(false);

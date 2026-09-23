@@ -11,6 +11,7 @@ import { Navbar } from "./components/Navbar";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DiscoverPage } from "./pages/DiscoverPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
@@ -63,7 +64,7 @@ function MainLayout() {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [toasts, setToasts] = useState([]);
-  const hideChrome = ["/", "/login", "/register"].includes(location.pathname);
+  const hideChrome = ["/", "/login", "/register", "/verify-email"].includes(location.pathname);
 
   const showToast = (message, type = "info") => {
     const id = Date.now() + Math.random();
@@ -110,6 +111,14 @@ function MainLayout() {
             element={
               <PublicOnlyRoute>
                 <RegisterPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/verify-email"
+            element={
+              <PublicOnlyRoute>
+                <VerifyEmailPage />
               </PublicOnlyRoute>
             }
           />

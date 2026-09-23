@@ -35,10 +35,10 @@ export const RegisterPage = () => {
     setLoading(true);
     try {
       await register(name.trim(), email.trim(), password);
-      // On success, redirect to Login per prompt requirements
-      navigate('/login', {
+      navigate('/verify-email', {
         state: {
-          message: 'Account created successfully! Please sign in with your credentials.',
+          email: email.trim(),
+          message: 'Account created. Enter the verification code sent to your email.',
         },
       });
     } catch (err) {

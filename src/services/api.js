@@ -62,6 +62,24 @@ export const api = {
     return handleResponse(response);
   },
 
+  async verifyOtp(data) {
+    const response = await fetch(`${API_BASE_URL}/user/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async resendOtp(data) {
+    const response = await fetch(`${API_BASE_URL}/user/resend-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
   async getMe() {
     const response = await fetch(`${API_BASE_URL}/user/me`, {
       method: 'GET',
