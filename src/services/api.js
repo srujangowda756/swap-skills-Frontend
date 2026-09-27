@@ -80,6 +80,24 @@ export const api = {
     return handleResponse(response);
   },
 
+  async forgetPassword(data) {
+    const response = await fetch(`${API_BASE_URL}/user/forget-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async setNewPassword(data) {
+    const response = await fetch(`${API_BASE_URL}/user/set-new-password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
   async getMe() {
     const response = await fetch(`${API_BASE_URL}/user/me`, {
       method: 'GET',

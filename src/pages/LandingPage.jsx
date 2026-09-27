@@ -1,121 +1,203 @@
-import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  ArrowLeftRight,
-  Compass,
-  Users,
-  MessageSquareText,
-  Sparkles,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 export const LandingPage = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", isOpen);
+    return () => document.body.classList.remove("menu-open");
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isOpen]);
+
+  const closeMenu = () => setIsOpen(false);
+  const handleFindMatch = (event) => {
+    event.preventDefault();
+    closeMenu();
+    navigate("/login");
+  };
+
   return (
-    <div className="landing-page-shell">
-      <div className="landing-orbit landing-orbit-one" aria-hidden="true" />
-      <div className="landing-orbit landing-orbit-two" aria-hidden="true" />
-      <div className="landing-card">
-        <div className="landing-layout">
-          <div className="landing-copy">
-            <div className="landing-brand-row">
-              <div className="brand-logo-glow landing-logo">
-                <ArrowLeftRight className="brand-icon" size={26} />
-              </div>
-              <span className="landing-tag">
-                <Sparkles size={13} /> Peer learning platform
-              </span>
-            </div>
-
-            <p className="landing-kicker">
-              Your next skill is closer than you think.
-            </p>
-            <h1 className="landing-title">
-              Swap skills.
-              <br />
-              <span className="gradient-text">Grow together.</span>
-            </h1>
-
-            <p className="landing-subtitle">
-              Trade practical knowledge with curious people. Teach what you
-              know, learn what matters, and make progress with a real person
-              beside you.
-            </p>
-
-            <div className="landing-actions">
-              <Link
-                to="/login"
-                className="btn btn-primary btn-lg"
-                id="landing-login-btn"
-              >
-                <span>Start swapping</span>
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/register"
-                className="btn btn-secondary btn-lg"
-                id="landing-signup-btn"
-              >
-                <span>Create a profile</span>
-              </Link>
-            </div>
-
-            <div className="landing-features">
-              <div className="feature-pill">
-                <Compass size={16} />
-                <span>Discover people</span>
-              </div>
-              <div className="feature-pill">
-                <Users size={16} />
-                <span>Swap expertise</span>
-              </div>
-              <div className="feature-pill">
-                <MessageSquareText size={16} />
-                <span>Message & match</span>
-              </div>
-            </div>
-          </div>
-          <div className="landing-visual" aria-label="A skill swap preview">
-            <div className="visual-header">
-              <span className="live-dot" /> Live skill exchange
-              <span className="visual-menu">•••</span>
-            </div>
-            <div className="visual-match-score">
-              <span>Great match</span>
-              <strong>92%</strong>
-            </div>
-            <div className="visual-people">
-              <div className="visual-person visual-person-left">
-                <div className="visual-avatar avatar-coral">AL</div>
-                <strong>Alex</strong>
-                <span>Teaches UX writing</span>
-              </div>
-              <div className="visual-swap-icon">
-                <ArrowLeftRight size={18} />
-              </div>
-              <div className="visual-person visual-person-right">
-                <div className="visual-avatar avatar-mint">JM</div>
-                <strong>Jamie</strong>
-                <span>Teaches React</span>
-              </div>
-            </div>
-            <div className="visual-tags">
-              <span>UX writing</span>
-              <span>React</span>
-              <span>Portfolio review</span>
-            </div>
-            <div className="visual-footer">
-              <span>
-                <span className="avatar-stack">
-                  <i>R</i>
-                  <i>S</i>
-                  <i>K</i>
-                </span>{" "}
-                18 people learning today
-              </span>
-              <ArrowRight size={16} />
-            </div>
-          </div>
-        </div>
+    <section className="hero" aria-label="SwapSkills welcome">
+      <div className="hero__bg" aria-hidden="true">
+        <span className="hero__blob hero__blob--teach" />
+        <span className="hero__blob hero__blob--learn" />
+        <span className="hero__blob hero__blob--neutral" />
       </div>
-    </div>
+
+      <header className="hero-nav">
+        <Link
+          to="/"
+          className="hero-brand"
+          aria-label="SwapSkills home"
+          onClick={closeMenu}
+        >
+          <svg
+            className="hero-brand__mark"
+            viewBox="0 0 32 32"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M12.5 4.5H7.8a3.3 3.3 0 0 0-3.3 3.3v9.4a3.3 3.3 0 0 0 3.3 3.3h9.4a3.3 3.3 0 0 0 3.3-3.3v-4.7"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+            <path
+              d="M19.5 27.5h4.7a3.3 3.3 0 0 0 3.3-3.3v-9.4a3.3 3.3 0 0 0-3.3-3.3h-9.4a3.3 3.3 0 0 0-3.3 3.3v4.7"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+            <path
+              d="m9 9 3.5-3.5L9 2m14 21-3.5 3.5L23 30"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="hero-brand__word">SwapSkills</span>
+        </Link>
+
+        <nav className="hero-nav__links" aria-label="Main navigation">
+          <Link style={{ "--i": 2 }} to="/login">
+            Discover
+          </Link>
+          <a style={{ "--i": 3 }} href="#skill-match">
+            How it Works
+          </a>
+          <Link style={{ "--i": 4 }} to="/register">
+            Community
+          </Link>
+          <a style={{ "--i": 5 }} href="#no-payment">
+            Pricing
+          </a>
+        </nav>
+
+        <Link
+          className={`btn-dark hero-nav__desktop-cta${isOpen ? " is-menu-open" : ""}`}
+          to="/register"
+          style={{ "--i": 6 }}
+        >
+          Get Started <ArrowUpRight size={16} />
+        </Link>
+
+        <button
+          className={`hero-menu-toggle${isOpen ? " is-open" : ""}`}
+          type="button"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </header>
+
+      <nav
+        id="mobile-navigation"
+        className={`hero-mobile-panel${isOpen ? " is-open" : ""}`}
+        aria-hidden={!isOpen}
+      >
+        <Link style={{ "--i": 2 }} to="/login" onClick={closeMenu}>
+          Discover <ArrowUpRight size={18} />
+        </Link>
+        <a style={{ "--i": 3 }} href="#skill-match" onClick={closeMenu}>
+          How it Works <ArrowUpRight size={18} />
+        </a>
+        <Link style={{ "--i": 4 }} to="/register" onClick={closeMenu}>
+          Community <ArrowUpRight size={18} />
+        </Link>
+        <a style={{ "--i": 5 }} href="#no-payment" onClick={closeMenu}>
+          Pricing <ArrowUpRight size={18} />
+        </a>
+        <Link
+          className="btn-dark hero-nav__mobile-cta"
+          to="/register"
+          onClick={closeMenu}
+        >
+          Get Started <ArrowRight size={17} />
+        </Link>
+      </nav>
+
+      <main className="hero-content">
+        <div className="hero-badge" style={{ "--i": 7 }}>
+          <span className="badge__tag">New</span>
+          <span>500+ skills being traded today</span>
+        </div>
+        <h1 className="hero-title" style={{ "--i": 8 }}>
+          The skill you have
+          <br className="brk" /> is someone&apos;s next lesson.
+        </h1>
+        <p className="hero-subcopy" style={{ "--i": 9 }}>
+          List what you can teach, find what you want to learn, and swap
+          directly with real people.
+          <br className="brk" />
+          <span id="no-payment">
+            No payment required — just knowledge for knowledge.
+          </span>
+        </p>
+
+        <form
+          id="skill-match"
+          className="skill-match"
+          onSubmit={handleFindMatch}
+        >
+          <div className="skill-match__fields">
+            <label
+              className="skill-match__pill skill-match__pill--teach"
+              style={{ "--i": 10 }}
+            >
+              <span>TEACH</span>
+              <input
+                name="teach"
+                placeholder="I can teach..."
+                aria-label="A skill you can teach"
+              />
+            </label>
+            <label
+              className="skill-match__pill skill-match__pill--learn"
+              style={{ "--i": 11 }}
+            >
+              <span>LEARN</span>
+              <input
+                name="learn"
+                placeholder="I want to learn..."
+                aria-label="A skill you want to learn"
+              />
+            </label>
+          </div>
+          <button
+            className="skill-match__submit"
+            type="submit"
+            style={{ "--i": 12 }}
+          >
+            Find My Match <ArrowRight size={18} />
+          </button>
+        </form>
+
+        <div className="hero-proof" aria-label="Community activity">
+          <span className="hero-proof__avatars" aria-hidden="true">
+            <i>M</i>
+            <i>A</i>
+            <i>J</i>
+          </span>
+          <span>Curious minds, sharing what they know</span>
+        </div>
+      </main>
+    </section>
   );
 };

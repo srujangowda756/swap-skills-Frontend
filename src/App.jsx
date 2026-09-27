@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -12,6 +12,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DiscoverPage } from "./pages/DiscoverPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
@@ -64,7 +65,13 @@ function MainLayout() {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [toasts, setToasts] = useState([]);
-  const hideChrome = ["/", "/login", "/register", "/verify-email"].includes(location.pathname);
+  const hideChrome = [
+    "/",
+    "/login",
+    "/register",
+    "/verify-email",
+    "/forgot-password",
+  ].includes(location.pathname);
 
   const showToast = (message, type = "info") => {
     const id = Date.now() + Math.random();
@@ -119,6 +126,14 @@ function MainLayout() {
             element={
               <PublicOnlyRoute>
                 <VerifyEmailPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnlyRoute>
+                <ForgotPasswordPage />
               </PublicOnlyRoute>
             }
           />

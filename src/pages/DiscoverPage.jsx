@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Compass,
   Search,
@@ -11,9 +11,9 @@ import {
   AlertCircle,
   User,
   Filter,
-} from 'lucide-react';
-import { api } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+} from "lucide-react";
+import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export const DiscoverPage = () => {
   const { user } = useAuth();
@@ -21,13 +21,13 @@ export const DiscoverPage = () => {
 
   const [skills, setSkills] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(true);
-  const [selectedSkillId, setSelectedSkillId] = useState('');
-  const [selectedType, setSelectedType] = useState('teach'); // 'teach' = find teachers, 'learn' = find students
+  const [selectedSkillId, setSelectedSkillId] = useState("");
+  const [selectedType, setSelectedType] = useState("teach"); // 'teach' = find teachers, 'learn' = find students
   const [matches, setMatches] = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [error, setError] = useState('');
-  const [searchFilter, setSearchFilter] = useState('');
+  const [error, setError] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
 
   // Fetch skills catalog
   useEffect(() => {
@@ -40,8 +40,8 @@ export const DiscoverPage = () => {
           setSelectedSkillId(data[0].id);
         }
       } catch (err) {
-        console.error('Failed to load skills:', err);
-        setError('Could not load skills catalog. Please try again.');
+        console.error("Failed to load skills:", err);
+        setError("Could not load skills catalog. Please try again.");
       } finally {
         setLoadingSkills(false);
       }
@@ -50,26 +50,29 @@ export const DiscoverPage = () => {
   }, []);
 
   // Fetch matches whenever selectedSkillId or selectedType changes
-  const fetchMatches = useCallback(async (skillId, type) => {
-    if (!skillId) return;
-    setLoadingMatches(true);
-    setHasSearched(true);
-    setError('');
-    try {
-      const results = await api.discoverUsers(skillId, type);
-      // Filter out current user if logged in so they don't see themselves as a match
-      const filtered = user
-        ? results.filter((item) => item.user_id !== user.id)
-        : results;
-      setMatches(filtered);
-    } catch (err) {
-      console.error('Discovery fetch error:', err);
-      setError('Failed to fetch matched users for this skill.');
-      setMatches([]);
-    } finally {
-      setLoadingMatches(false);
-    }
-  }, [user]);
+  const fetchMatches = useCallback(
+    async (skillId, type) => {
+      if (!skillId) return;
+      setLoadingMatches(true);
+      setHasSearched(true);
+      setError("");
+      try {
+        const results = await api.discoverUsers(skillId, type);
+        // Filter out current user if logged in so they don't see themselves as a match
+        const filtered = user
+          ? results.filter((item) => item.user_id !== user.id)
+          : results;
+        setMatches(filtered);
+      } catch (err) {
+        console.error("Discovery fetch error:", err);
+        setError("Failed to fetch matched users for this skill.");
+        setMatches([]);
+      } finally {
+        setLoadingMatches(false);
+      }
+    },
+    [user],
+  );
 
   useEffect(() => {
     if (selectedSkillId) {
@@ -88,11 +91,11 @@ export const DiscoverPage = () => {
   const selectedSkillObj = skills.find((s) => s.id === selectedSkillId);
 
   const getInitials = (name) => {
-    if (!name) return 'U';
+    if (!name) return "U";
     return name
-      .split(' ')
+      .split(" ")
       .map((part) => part[0])
-      .join('')
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -100,7 +103,7 @@ export const DiscoverPage = () => {
   const filteredMatches = matches.filter((m) =>
     searchFilter
       ? m.user_name.toLowerCase().includes(searchFilter.toLowerCase())
-      : true
+      : true,
   );
 
   return (
@@ -114,7 +117,8 @@ export const DiscoverPage = () => {
               <h1 className="page-title">Discover & Browse Users</h1>
             </div>
             <p className="matchmaker-subtitle">
-              Select a skill and find community members who can teach it or want to learn it.
+              Select a skill and find community members who can teach it or want
+              to learn it.
             </p>
           </div>
 
@@ -122,11 +126,15 @@ export const DiscoverPage = () => {
             {/* Type Toggle */}
             <div className="intent-switcher">
               <span className="control-label">Looking for:</span>
-              <div className="segmented-control" role="group" aria-label="Filter user role">
+              <div
+                className="segmented-control"
+                role="group"
+                aria-label="Filter user role"
+              >
                 <button
                   type="button"
-                  className={`segment-btn ${selectedType === 'teach' ? 'active' : ''}`}
-                  onClick={() => handleTypeToggle('teach')}
+                  className={`segment-btn ${selectedType === "teach" ? "active" : ""}`}
+                  onClick={() => handleTypeToggle("teach")}
                   id="filter-teach-btn"
                 >
                   <GraduationCap size={16} />
@@ -134,8 +142,8 @@ export const DiscoverPage = () => {
                 </button>
                 <button
                   type="button"
-                  className={`segment-btn ${selectedType === 'learn' ? 'active' : ''}`}
-                  onClick={() => handleTypeToggle('learn')}
+                  className={`segment-btn ${selectedType === "learn" ? "active" : ""}`}
+                  onClick={() => handleTypeToggle("learn")}
                   id="filter-learn-btn"
                 >
                   <Users size={16} />
@@ -180,7 +188,7 @@ export const DiscoverPage = () => {
                   <button
                     key={skill.id}
                     type="button"
-                    className={`skill-chip ${selectedSkillId === skill.id ? 'active' : ''}`}
+                    className={`skill-chip ${selectedSkillId === skill.id ? "active" : ""}`}
                     onClick={() => handleSkillChange(skill.id)}
                   >
                     {skill.skill_name}
@@ -202,11 +210,12 @@ export const DiscoverPage = () => {
                   Members for <strong>{selectedSkillObj.skill_name}</strong>
                 </>
               ) : (
-                'Available Users'
+                "Available Users"
               )}
             </h2>
             <span className="count-tag">
-              {matches.length} {matches.length === 1 ? 'member' : 'members'} found
+              {matches.length} {matches.length === 1 ? "member" : "members"}{" "}
+              found
             </span>
           </div>
 
@@ -250,18 +259,24 @@ export const DiscoverPage = () => {
                     <h3 className="match-user-name">{match.user_name}</h3>
                     <span
                       className={`badge ${
-                        match.type === 'teach' ? 'badge-teach' : 'badge-learn'
+                        match.type === "teach" ? "badge-teach" : "badge-learn"
                       }`}
                     >
-                      {match.type === 'teach' ? 'Offers Teaching' : 'Wants to Learn'}
+                      {match.type === "teach"
+                        ? "Offers Teaching"
+                        : "Wants to Learn"}
                     </span>
                   </div>
                 </div>
 
                 <div className="match-skill-box">
-                  <div className="match-skill-name">{match.skill_name}</div>
+                  <div className={`match-skill-name chip chip--${match.type}`}>
+                    {match.skill_name}
+                  </div>
                   {match.skill_description && (
-                    <p className="match-skill-desc">{match.skill_description}</p>
+                    <p className="match-skill-desc">
+                      {match.skill_description}
+                    </p>
                   )}
                 </div>
 
@@ -286,12 +301,13 @@ export const DiscoverPage = () => {
             </div>
             <h3>No matches found</h3>
             <p>
-              No community members are currently listed as{' '}
-              {selectedType === 'teach' ? 'teaching' : 'learning'}{' '}
-              <strong>{selectedSkillObj?.skill_name || 'this skill'}</strong>.
+              No community members are currently listed as{" "}
+              {selectedType === "teach" ? "teaching" : "learning"}{" "}
+              <strong>{selectedSkillObj?.skill_name || "this skill"}</strong>.
             </p>
             <p className="text-secondary text-sm mt-2">
-              Try switching between "People Who Teach" and "People Who Want to Learn", or select a different skill above.
+              Try switching between "People Who Teach" and "People Who Want to
+              Learn", or select a different skill above.
             </p>
           </div>
         )}

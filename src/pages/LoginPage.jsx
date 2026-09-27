@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Loader2,
+  Sparkles,
+  CheckCircle2,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,15 +24,15 @@ export const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    if (!email.trim() || !email.includes('@')) {
-      setError('Please provide a valid email address');
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please provide a valid email address");
       return;
     }
 
     if (!password) {
-      setError('Please enter your password');
+      setError("Please enter your password");
       return;
     }
 
@@ -33,19 +40,21 @@ export const LoginPage = () => {
     try {
       await login(email.trim(), password);
       // On success, redirects to Dashboard
-      navigate('/dashboard', { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      if (err.status === 403 && err.message === 'Email not verified') {
-        navigate('/verify-email', {
+      if (err.status === 403 && err.message === "Email not verified") {
+        navigate("/verify-email", {
           replace: true,
           state: {
             email: email.trim(),
-            message: 'Verify your email before signing in.',
+            message: "Verify your email before signing in.",
           },
         });
         return;
       }
-      setError(err.message || 'Login failed. Please check your email and password.');
+      setError(
+        err.message || "Login failed. Please check your email and password.",
+      );
     } finally {
       setLoading(false);
     }
@@ -100,6 +109,12 @@ export const LoginPage = () => {
             <div className="form-group">
               <div className="label-row">
                 <label htmlFor="login-password">Password</label>
+                <Link
+                  to="/forgot-password"
+                  className="auth-link auth-link-small"
+                >
+                  Forgot password?
+                </Link>
               </div>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon" />
@@ -139,7 +154,7 @@ export const LoginPage = () => {
 
           <div className="auth-footer">
             <p>
-              Don't have an account yet?{' '}
+              Don't have an account yet?{" "}
               <Link to="/register" className="auth-link">
                 Create one now
               </Link>
