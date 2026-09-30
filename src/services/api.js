@@ -115,15 +115,6 @@ export const api = {
     return handleResponse(response);
   },
 
-  async createSkill(skillData) {
-    const response = await fetch(`${API_BASE_URL}/skills/`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(skillData),
-    });
-    return handleResponse(response);
-  },
-
   // User Skills
   async getUserSkills(userId) {
     try {

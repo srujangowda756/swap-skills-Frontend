@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import {
-  User,
   GraduationCap,
   Sparkles,
   Trash2,
@@ -9,10 +8,10 @@ import {
   Calendar,
   Loader2,
   Mail,
-  Award
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { api } from '../services/api';
+  Award,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../services/api";
 
 export const MyProfileView = ({
   allSkills = [],
@@ -23,18 +22,18 @@ export const MyProfileView = ({
   setActiveTab,
 }) => {
   const { user } = useAuth();
-  const [activeSubTab, setActiveSubTab] = useState('all'); // 'all', 'teach', 'learn'
-  const [selectedSkillToAdd, setSelectedSkillToAdd] = useState('');
-  const [selectedTypeToAdd, setSelectedTypeToAdd] = useState('teach');
+  const [activeSubTab, setActiveSubTab] = useState("all"); // 'all', 'teach', 'learn'
+  const [selectedSkillToAdd, setSelectedSkillToAdd] = useState("");
+  const [selectedTypeToAdd, setSelectedTypeToAdd] = useState("teach");
   const [addingSkill, setAddingSkill] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  const teachSkills = mySkills.filter((s) => s.type === 'teach');
-  const learnSkills = mySkills.filter((s) => s.type === 'learn');
+  const teachSkills = mySkills.filter((s) => s.type === "teach");
+  const learnSkills = mySkills.filter((s) => s.type === "learn");
 
   // Filter skills not yet added in the selected type
   const availableToAdd = allSkills.filter(
-    (skill) => !mySkills.some((ms) => ms.skill_id === skill.id && ms.type === selectedTypeToAdd)
+    (skill) => !mySkills.some((ms) => ms.skill_id === skill.id),
   );
 
   const handleQuickAdd = async (e) => {
@@ -47,21 +46,25 @@ export const MyProfileView = ({
         skill_id: selectedSkillToAdd,
         type: selectedTypeToAdd,
       });
-      setSelectedSkillToAdd('');
+      setSelectedSkillToAdd("");
       onRefreshMySkills();
       onShowToast(
-        `Added to your ${selectedTypeToAdd === 'teach' ? 'Teaching' : 'Learning'} list!`,
-        'success'
+        `Added to your ${selectedTypeToAdd === "teach" ? "Teaching" : "Learning"} list!`,
+        "success",
       );
     } catch (err) {
-      onShowToast(err.message || 'Failed to add skill', 'error');
+      onShowToast(err.message || "Failed to add skill", "error");
     } finally {
       setAddingSkill(false);
     }
   };
 
   const handleRemove = async (userSkillId, skillName) => {
-    if (!window.confirm(`Are you sure you want to remove "${skillName}" from your profile?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to remove "${skillName}" from your profile?`,
+      )
+    ) {
       return;
     }
 
@@ -69,43 +72,43 @@ export const MyProfileView = ({
     try {
       await api.removeUserSkill(userSkillId);
       onRefreshMySkills();
-      onShowToast(`Removed "${skillName}"`, 'info');
+      onShowToast(`Removed "${skillName}"`, "info");
     } catch (err) {
-      onShowToast(err.message || 'Failed to remove skill', 'error');
+      onShowToast(err.message || "Failed to remove skill", "error");
     } finally {
       setDeletingId(null);
     }
   };
 
   const formatDate = (isoString) => {
-    if (!isoString) return '';
+    if (!isoString) return "";
     try {
       return new Date(isoString).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       });
     } catch {
-      return '';
+      return "";
     }
   };
 
   const getInitials = (name) => {
-    if (!name) return 'U';
+    if (!name) return "U";
     return name
-      .split(' ')
+      .split(" ")
       .map((part) => part[0])
-      .join('')
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   const displayedSkills =
-    activeSubTab === 'teach'
+    activeSubTab === "teach"
       ? teachSkills
-      : activeSubTab === 'learn'
-      ? learnSkills
-      : mySkills;
+      : activeSubTab === "learn"
+        ? learnSkills
+        : mySkills;
 
   return (
     <div className="profile-container">
@@ -131,11 +134,15 @@ export const MyProfileView = ({
         <div className="profile-stats-grid">
           <div className="stat-card">
             <div className="stat-card-title">Skills I Teach</div>
-            <div className="stat-card-val text-emerald">{teachSkills.length}</div>
+            <div className="stat-card-val text-emerald">
+              {teachSkills.length}
+            </div>
           </div>
           <div className="stat-card">
             <div className="stat-card-title">Want to Learn</div>
-            <div className="stat-card-val text-violet">{learnSkills.length}</div>
+            <div className="stat-card-val text-violet">
+              {learnSkills.length}
+            </div>
           </div>
           <div className="stat-card">
             <div className="stat-card-title">Total Skills</div>
@@ -170,16 +177,16 @@ export const MyProfileView = ({
           <div className="segmented-control">
             <button
               type="button"
-              className={`segment-btn ${selectedTypeToAdd === 'teach' ? 'active' : ''}`}
-              onClick={() => setSelectedTypeToAdd('teach')}
+              className={`segment-btn ${selectedTypeToAdd === "teach" ? "active" : ""}`}
+              onClick={() => setSelectedTypeToAdd("teach")}
             >
               <GraduationCap size={15} />
               <span>I Can Teach</span>
             </button>
             <button
               type="button"
-              className={`segment-btn ${selectedTypeToAdd === 'learn' ? 'active' : ''}`}
-              onClick={() => setSelectedTypeToAdd('learn')}
+              className={`segment-btn ${selectedTypeToAdd === "learn" ? "active" : ""}`}
+              onClick={() => setSelectedTypeToAdd("learn")}
             >
               <Sparkles size={15} />
               <span>I Want to Learn</span>
@@ -208,23 +215,23 @@ export const MyProfileView = ({
         <div className="skills-filter-tabs">
           <button
             type="button"
-            className={`filter-tab ${activeSubTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveSubTab('all')}
+            className={`filter-tab ${activeSubTab === "all" ? "active" : ""}`}
+            onClick={() => setActiveSubTab("all")}
           >
             All Skills ({mySkills.length})
           </button>
           <button
             type="button"
-            className={`filter-tab ${activeSubTab === 'teach' ? 'active' : ''}`}
-            onClick={() => setActiveSubTab('teach')}
+            className={`filter-tab ${activeSubTab === "teach" ? "active" : ""}`}
+            onClick={() => setActiveSubTab("teach")}
           >
             <GraduationCap size={15} />
             <span>Teaching ({teachSkills.length})</span>
           </button>
           <button
             type="button"
-            className={`filter-tab ${activeSubTab === 'learn' ? 'active' : ''}`}
-            onClick={() => setActiveSubTab('learn')}
+            className={`filter-tab ${activeSubTab === "learn" ? "active" : ""}`}
+            onClick={() => setActiveSubTab("learn")}
           >
             <Sparkles size={15} />
             <span>Learning ({learnSkills.length})</span>
@@ -240,12 +247,13 @@ export const MyProfileView = ({
           </div>
           <h3>No skills found in this section</h3>
           <p>
-            Start adding skills you want to teach or learn to discover matches and exchange skills with other members.
+            Start adding skills you want to teach or learn to discover matches
+            and exchange skills with other members.
           </p>
           <button
             type="button"
             className="btn btn-secondary mt-3"
-            onClick={() => setActiveTab('skills')}
+            onClick={() => setActiveTab("skills")}
           >
             Browse Full Catalog
           </button>
@@ -254,21 +262,25 @@ export const MyProfileView = ({
         <div className="my-skills-grid">
           {displayedSkills.map((userSkill) => {
             const isDeleting = deletingId === userSkill.id;
-            const isTeach = userSkill.type === 'teach';
+            const isTeach = userSkill.type === "teach";
 
             return (
               <div key={userSkill.id} className="my-skill-card">
                 <div className="my-skill-top">
                   <div className="my-skill-title-block">
-                    <span className={`badge ${isTeach ? 'badge-teach' : 'badge-learn'}`}>
-                      {isTeach ? 'Teaching' : 'Learning'}
+                    <span
+                      className={`badge ${isTeach ? "badge-teach" : "badge-learn"}`}
+                    >
+                      {isTeach ? "Teaching" : "Learning"}
                     </span>
                     <h4 className="my-skill-name">{userSkill.skill_name}</h4>
                   </div>
                   <button
                     type="button"
                     className="btn-danger-ghost"
-                    onClick={() => handleRemove(userSkill.id, userSkill.skill_name)}
+                    onClick={() =>
+                      handleRemove(userSkill.id, userSkill.skill_name)
+                    }
                     disabled={isDeleting}
                     title="Remove from my profile"
                   >
@@ -289,7 +301,9 @@ export const MyProfileView = ({
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => onSelectSkillForDiscovery(userSkill.skill_id)}
+                    onClick={() =>
+                      onSelectSkillForDiscovery(userSkill.skill_id)
+                    }
                   >
                     <Compass size={14} />
                     <span>Find Peers</span>
