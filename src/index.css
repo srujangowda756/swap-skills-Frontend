@@ -267,6 +267,124 @@ a:hover {
   gap: 0.75rem;
 }
 
+.notification-menu {
+  position: relative;
+}
+
+.notification-trigger {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.notification-trigger:hover,
+.notification-trigger[aria-expanded="true"] {
+  color: var(--text-white);
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+}
+
+.notification-count {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  color: #101820;
+  background: var(--accent-mint);
+  border: 2px solid var(--bg-primary);
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.notification-dropdown {
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  width: 340px;
+  max-height: min(420px, calc(100vh - 100px));
+  overflow: hidden;
+  background: #141e2a;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.notification-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notification-heading h2 {
+  font-size: 0.95rem;
+}
+
+.notification-heading > span {
+  color: var(--accent-mint);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.notification-list {
+  max-height: 350px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.notification-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+
+.notification-item:hover,
+.notification-item.unread {
+  background: rgba(114, 230, 197, 0.07);
+}
+
+.notification-message {
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.notification-item time {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.notification-empty {
+  padding: 1.4rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
 .user-badge {
   display: flex;
   align-items: center;
@@ -1554,6 +1672,10 @@ a:hover {
     right: 1rem;
     bottom: 1rem;
   }
+  .notification-dropdown {
+    right: 0;
+    width: min(340px, calc(100vw - 2rem));
+  }
 }
 
 /* =========================================================
@@ -2358,6 +2480,10 @@ a:hover {
   display: inline-block;
   margin-top: 0.2rem;
   font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.status-indicator.online {
   color: #5eead4;
 }
 
@@ -2663,5 +2789,102 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
+
+.sessions-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.session-scheduler, .session-list-panel {
+  padding: 1.25rem;
+}
+
+.session-section-heading, .session-item-main, .session-item-actions,
+.session-review-actions, .profile-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.session-section-heading {
+  justify-content: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.session-section-heading h2, .session-item h3 {
+  margin: 0;
+  color: var(--text-white);
+}
+
+.session-section-heading p, .session-item p, .session-helper-text {
+  margin: 0.3rem 0 0;
+  color: var(--text-secondary);
+}
+
+.session-schedule-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.3fr) minmax(190px, 1fr) minmax(130px, 0.6fr) auto;
+  align-items: end;
+  gap: 0.9rem;
+}
+
+.session-schedule-form label, .session-review-form > label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.session-schedule-form .btn { min-height: 44px; }
+.session-helper-text { padding: 0.5rem 0 0.25rem; }
+
+.session-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.session-item, .profile-review {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.session-item-main { align-items: flex-start; }
+.session-item-main .status-pill { text-transform: capitalize; }
+.session-item-actions { justify-content: flex-end; margin-top: 0.9rem; }
+.session-reviewed { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent-mint); }
+.session-notice { margin: 0; color: var(--accent-mint); }
+
+.session-review-form {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.session-rating-picker { display: flex; gap: 0.25rem; }
+.session-rating-picker button { padding: 0.35rem; border: 0; background: transparent; color: var(--text-muted); cursor: pointer; }
+.session-rating-picker button.selected { color: #f5ad68; }
+.session-review-actions { justify-content: flex-end; }
+.profile-reviews-list { display: grid; gap: 0.75rem; }
+.profile-review-heading { color: var(--text-secondary); font-size: 0.82rem; }
+.profile-review-heading time { white-space: nowrap; }
+.profile-review-rating { display: flex; gap: 0.15rem; color: #f5ad68; }
+.profile-review > p { margin: 0.75rem 0 0; color: var(--text-primary); white-space: pre-wrap; }
+
+@media (max-width: 760px) {
+  .session-schedule-form { grid-template-columns: 1fr 1fr; }
+  .session-schedule-form .btn { grid-column: 1 / -1; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .session-scheduler, .session-list-panel { padding: 1rem; }
+  .session-schedule-form { grid-template-columns: 1fr; }
+  .session-item-main { flex-direction: column; }
+  .session-item-actions { flex-wrap: wrap; }
 }
 

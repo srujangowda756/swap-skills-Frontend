@@ -17,6 +17,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { DiscoverPage } from "./pages/DiscoverPage";
 import { UserProfilePage } from "./pages/UserProfilePage";
 import { RequestsPage } from "./pages/RequestsPage";
+import { SessionsPage } from "./pages/SessionsPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ChatPage } from "./pages/ChatPage";
 import { Toast } from "./components/Toast";
@@ -166,6 +167,14 @@ function MainLayout() {
             }
           />
           <Route
+            path="/sessions"
+            element={
+              <ProtectedRoute>
+                <SessionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/inbox"
             element={
               <ProtectedRoute>
@@ -204,7 +213,7 @@ function MainLayout() {
         <footer className="app-footer">
           <div className="footer-container">
             <p className="footer-text">
-              © 2026 SwapSkills v1. Peer-to-Peer Knowledge Sharing Platform.
+              © 2026 SwapSkills Peer-to-Peer Knowledge Sharing Platform.
             </p>
             <div className="footer-api-status">
               <span className="status-dot"></span>

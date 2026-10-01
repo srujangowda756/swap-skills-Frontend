@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   Loader2,
   AlertCircle,
   Send,
+  Star,
 } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +23,7 @@ export const UserProfilePage = () => {
   const [error, setError] = useState("");
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
   const [mySkills, setMySkills] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   const userName = location.state?.userName || "Member Profile";
 
@@ -31,8 +33,15 @@ export const UserProfilePage = () => {
       setLoading(true);
       setError("");
       try {
-        const data = await api.getUserSkills(userId);
-        setSkills(data || []);
+        const [skillsResult, reviewsResult] = await Promise.allSettled([
+          api.getUserSkills(userId),
+          api.getUserReviews(userId),
+        ]);
+        if (skillsResult.status === "rejected") throw skillsResult.reason;
+        setSkills(skillsResult.value || []);
+        setReviews(
+          reviewsResult.status === "fulfilled" ? reviewsResult.value || [] : [],
+        );
       } catch (err) {
         console.error("Failed to load user profile skills:", err);
         setError("Could not retrieve this user profile.");
@@ -198,6 +207,65 @@ export const UserProfilePage = () => {
                     <Sparkles size={15} className="chip-icon text-violet" />
                     <span className="chip-name">{userSkill.skill_name}</span>
                   </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="skills-section reviews-section">
+            <div className="section-header">
+              <div className="section-title-row">
+                <div className="section-icon-badge learn-icon-badge">
+                  <Star size={20} />
+                </div>
+                <div>
+                  <h2 className="section-title">Reviews</h2>
+                  <p className="section-subtitle">
+                    Feedback from completed skill sessions
+                  </p>
+                </div>
+              </div>
+              <span className="skill-counter-badge badge-learn">
+                {reviews.length} {reviews.length === 1 ? "Review" : "Reviews"}
+              </span>
+            </div>
+
+            {reviews.length === 0 ? (
+              <div className="empty-chip-box">
+                <p>This member has not received any reviews yet.</p>
+              </div>
+            ) : (
+              <div className="profile-reviews-list">
+                {reviews.map((review) => (
+                  <article className="profile-review" key={review.id}>
+                    <div className="profile-review-heading">
+                      <div
+                        className="profile-review-rating"
+                        aria-label={`${review.rating} out of 5 stars`}
+                      >
+                        {Array.from({ length: 5 }, (_, index) => (
+                          <Star
+                            key={index}
+                            size={16}
+                            fill={
+                              index < review.rating ? "currentColor" : "none"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <time dateTime={review.created_at}>
+                        {new Date(review.created_at).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
+                      </time>
+                    </div>
+                    {review.comment && <p>{review.comment}</p>}
+                  </article>
                 ))}
               </div>
             )}

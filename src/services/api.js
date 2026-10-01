@@ -185,9 +185,67 @@ export const api = {
     return handleResponse(response);
   },
 
+  async createSession(payload) {
+    const response = await fetch(`${API_BASE_URL}/sessions/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
+  },
+
+  async getMySessions() {
+    const response = await fetch(`${API_BASE_URL}/sessions/mine`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async updateSessionStatus(sessionId, action) {
+    const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/${action}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async createReview(payload) {
+    const response = await fetch(`${API_BASE_URL}/reviews/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
+  },
+
+  async getUserReviews(userId) {
+    const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
   async getConversations() {
     const response = await fetch(`${API_BASE_URL}/conversations/`, {
       method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async getNotifications() {
+    const response = await fetch(`${API_BASE_URL}/notifications/`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async markNotificationRead(notificationId) {
+    const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
+      method: 'PUT',
       headers: getAuthHeaders(),
     });
     return handleResponse(response);

@@ -1,40 +1,119 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, SendHorizonal } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../services/api";
+import { API_BASE_URL, api } from "../services/api";
 
 export const ChatPage = () => {
   const { conversationId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const bottomRef = useRef(null);
+  const socketRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [otherUserName, setOtherUserName] = useState(
-    location.state?.otherUserName || "Chat",
-  );
-
-  const loadMessages = async () => {
-    if (!conversationId) return;
-    try {
-      setLoading(true);
-      const data = await api.getConversationMessages(conversationId);
-      setMessages(data || []);
-    } catch (err) {
-      console.error("Failed to load messages:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [socketConnection, setSocketConnection] = useState({
+    conversationId: null,
+    connected: false,
+  });
+  const [otherUserOnline, setOtherUserOnline] = useState({
+    conversationId: null,
+    online: null,
+  });
+  const [loadedConversationId, setLoadedConversationId] = useState(null);
+  const otherUserName = location.state?.otherUserName || "Chat";
+  const presenceStatus =
+    otherUserOnline.conversationId === conversationId
+      ? otherUserOnline.online
+      : null;
+  const loading = loadedConversationId !== conversationId;
 
   useEffect(() => {
-    loadMessages();
+    if (!conversationId) return undefined;
+
+    let active = true;
+    api
+      .getConversationMessages(conversationId)
+      .then((data) => {
+        if (active) {
+          setMessages((current) => {
+            const messageMap = new Map(
+              (data || []).map((message) => [message.id, message]),
+            );
+            current.forEach((message) => messageMap.set(message.id, message));
+            return [...messageMap.values()];
+          });
+        }
+      })
+      .catch((err) => console.error("Failed to load messages:", err))
+      .finally(() => {
+        if (active) setLoadedConversationId(conversationId);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [conversationId]);
+
+  useEffect(() => {
+    if (!conversationId || !token) return undefined;
+
+    const socketUrl = new URL(API_BASE_URL);
+    socketUrl.protocol = socketUrl.protocol === "https:" ? "wss:" : "ws:";
+    socketUrl.pathname = `/ws/${conversationId}`;
+    socketUrl.search = new URLSearchParams({ token }).toString();
+
+    const socket = new WebSocket(socketUrl);
+    socketRef.current = socket;
+    socket.onopen = () =>
+      setSocketConnection({ conversationId, connected: true });
+
+    socket.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      if (payload.type === "presence_snapshot") {
+        setOtherUserOnline({
+          conversationId,
+          online: payload.online_user_ids.some(
+            (onlineUserId) => onlineUserId !== String(user?.id),
+          ),
+        });
+        return;
+      }
+      if (payload.type === "presence") {
+        if (payload.user_id !== String(user?.id)) {
+          setOtherUserOnline({ conversationId, online: payload.online });
+        }
+        return;
+      }
+      if (payload.id) {
+        setMessages((current) =>
+          current.some((message) => message.id === payload.id)
+            ? current
+            : [...current, payload],
+        );
+      }
+    };
+    socket.onclose = () => {
+      setSocketConnection({ conversationId, connected: false });
+      setOtherUserOnline({ conversationId, online: null });
+    };
+    socket.onerror = () => {
+      setSocketConnection({ conversationId, connected: false });
+      setOtherUserOnline({ conversationId, online: null });
+    };
+
+    return () => {
+      socket.onmessage = null;
+      socket.onopen = null;
+      socket.onclose = null;
+      socket.onerror = null;
+      socket.close();
+      if (socketRef.current === socket) socketRef.current = null;
+    };
+  }, [conversationId, token, user?.id]);
 
   useEffect(() => {
     if (bottomRef.current) {
@@ -48,11 +127,11 @@ export const ChatPage = () => {
 
     try {
       setSending(true);
-      const sent = await api.sendMessage({
-        conversation_id: conversationId,
-        content: trimmed,
-      });
-      setMessages((prev) => [...prev, sent]);
+      const socket = socketRef.current;
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        throw new Error("Chat connection is not ready");
+      }
+      socket.send(JSON.stringify({ content: trimmed }));
       setInput("");
     } catch (err) {
       console.error("Send failed:", err);
@@ -85,7 +164,15 @@ export const ChatPage = () => {
           </div>
           <div>
             <h2>{otherUserName}</h2>
-            <span className="status-indicator">Online</span>
+            <span
+              className={`status-indicator ${presenceStatus ? "online" : ""}`}
+            >
+              {presenceStatus === null
+                ? "Connecting…"
+                : presenceStatus
+                  ? "Online"
+                  : "Offline"}
+            </span>
           </div>
         </header>
 
@@ -137,7 +224,11 @@ export const ChatPage = () => {
             type="button"
             className="btn btn-primary chat-send-btn"
             onClick={handleSend}
-            disabled={sending}
+            disabled={
+              sending ||
+              socketConnection.conversationId !== conversationId ||
+              !socketConnection.connected
+            }
           >
             <SendHorizonal size={17} />
             <span>{sending ? "Sending" : "Send"}</span>
