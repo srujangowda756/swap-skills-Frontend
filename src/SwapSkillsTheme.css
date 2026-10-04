@@ -4,8 +4,14 @@
   --card: rgba(248, 248, 246, 0.97);
   --shell: 1120px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --teach: #14b8a6;
-  --learn: #fb7185;
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-primary-soft: rgba(20, 184, 166, 0.12);
+  --color-secondary: #be123c;
+  --color-secondary-hover: #9f1236;
+  --color-secondary-soft: rgba(251, 113, 133, 0.12);
+  --teach: var(--color-primary);
+  --learn: var(--color-secondary);
 
   --bg-primary: #eef2ee;
   --bg-secondary: #f7f8f5;
@@ -20,18 +26,18 @@
   --text-secondary: var(--muted);
   --text-muted: #767d78;
   --text-white: #ffffff;
-  --accent-cyan: #0f766e;
-  --accent-cyan-hover: #115e59;
+  --accent-cyan: var(--color-primary);
+  --accent-cyan-hover: var(--color-primary-hover);
   --accent-cyan-glow: rgba(20, 184, 166, 0.18);
-  --accent-violet: #be123c;
+  --accent-violet: var(--color-secondary);
   --accent-violet-glow: rgba(251, 113, 133, 0.16);
-  --accent-coral: var(--learn);
-  --accent-mint: var(--teach);
+  --accent-coral: var(--color-secondary);
+  --accent-mint: var(--color-primary);
   --badge-teach-bg: rgba(20, 184, 166, 0.12);
-  --badge-teach-text: #0f766e;
+  --badge-teach-text: var(--color-primary);
   --badge-teach-border: rgba(20, 184, 166, 0.25);
   --badge-learn-bg: rgba(251, 113, 133, 0.12);
-  --badge-learn-text: #be123c;
+  --badge-learn-text: var(--color-secondary);
   --badge-learn-border: rgba(251, 113, 133, 0.25);
   --shadow-sm: 0 2px 8px rgba(17, 17, 17, 0.06);
   --shadow-md: 0 8px 24px rgba(17, 17, 17, 0.08);
@@ -113,7 +119,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid #0f766e;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 
@@ -151,7 +157,7 @@ a {
 }
 
 .brand-icon {
-  color: #0f766e;
+  color: var(--color-primary);
 }
 
 .brand-title {
@@ -175,58 +181,59 @@ a {
 
 .btn-primary {
   color: #ffffff;
-  background: #111111;
-  border-color: #111111;
-  box-shadow: none;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
   color: #ffffff;
-  background: #303633;
-  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.12);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.28);
 }
 
 .btn-secondary {
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.76);
-  border-color: rgba(17, 17, 17, 0.14);
+  color: var(--color-secondary);
+  background: var(--color-secondary-soft);
+  border-color: rgba(251, 113, 133, 0.38);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  color: var(--ink);
-  background: #ffffff;
-  border-color: rgba(17, 17, 17, 0.3);
+  color: var(--color-secondary-hover);
+  background: rgba(251, 113, 133, 0.18);
+  border-color: var(--color-secondary);
 }
 
 .btn-outline-teach {
-  color: #0f766e;
+  color: var(--color-primary);
   border-color: rgba(20, 184, 166, 0.42);
   background: rgba(20, 184, 166, 0.08);
 }
 
 .btn-active-teach {
-  color: #0f766e;
+  color: var(--color-primary);
   border-color: rgba(20, 184, 166, 0.3);
   background: rgba(20, 184, 166, 0.14);
 }
 
 .btn-outline-learn,
 .btn-active-learn {
-  color: #be123c;
+  color: var(--color-secondary);
   border-color: rgba(251, 113, 133, 0.38);
   background: rgba(251, 113, 133, 0.1);
 }
 
 .btn-active-learn:hover:not(:disabled),
 .btn-outline-learn:hover:not(:disabled) {
-  color: #9f1236;
+  color: var(--color-secondary-hover);
   background: rgba(251, 113, 133, 0.16);
 }
 
 .badge-teach,
 .chip-teach,
 .skill-chip-tag.chip-teach {
-  color: #0f766e;
+  color: var(--color-primary);
   background: rgba(20, 184, 166, 0.12);
   border-color: rgba(20, 184, 166, 0.25);
 }
@@ -234,7 +241,7 @@ a {
 .badge-learn,
 .chip-learn,
 .skill-chip-tag.chip-learn {
-  color: #be123c;
+  color: var(--color-secondary);
   background: rgba(251, 113, 133, 0.12);
   border-color: rgba(251, 113, 133, 0.25);
 }
